@@ -18,7 +18,7 @@ import net.liftmodules.mongoauth._
 
 class Boot {
   def boot {
-   MongoConfig.init()
+   MongoConfig.mongolab()
     MongoAuth.authUserMeta.default.set(User)
     MongoAuth.siteName.default.set("$clog$")
 

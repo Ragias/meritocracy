@@ -41,7 +41,7 @@ object Site extends Locs {
   val messagesLoc = messagesParam.toLoc
   
   val listOfUsers = MenuLoc(Menu.i("List of users")/"users" >> RequireLoggedIn)
-
+  val messenger = MenuLoc(Menu.i("Messenger")/ "messenger" >> RequireLoggedIn)
   private def menu = List(home.menu,
     login.menu,
     register.menu,
@@ -52,7 +52,8 @@ object Site extends Locs {
     account.menu,
     editProfile.menu,
     messagesParam,
-    listOfUsers.menu
+    listOfUsers.menu,
+    messenger.menu
     )
 
   def siteMap = SiteMap(menu: _*)

@@ -6,6 +6,8 @@ import json._
 import mongodb._
 import util.Props
 import net.liftweb.mongodb.{MongoDB , DefaultMongoIdentifier , MongoAddress , MongoHost }
+import com.mongodb.ServerAddress
+import com.mongodb.Mongo
 
 object MongoConfig extends Loggable{
 	def init(){
@@ -13,6 +15,13 @@ object MongoConfig extends Loggable{
         DefaultMongoIdentifier,
         MongoAddress(MongoHost(), "meritocracy")
       )
+	}
+	def mongolab(){
+	  val srvr = new ServerAddress(
+       Props.get("mongo.host", "ds037637.mongolab.com"),
+       Props.getInt("mongo.port", 37637)
+    )
+    MongoDB.defineDbAuth(DefaultMongoIdentifier, new Mongo(srvr), "meritocracy", "clog", "341414")
 	}
 }
 

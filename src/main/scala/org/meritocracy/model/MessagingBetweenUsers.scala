@@ -1,4 +1,5 @@
 package org.meritocracy.model
+import net.liftweb.util.Helpers._
 import net.liftweb.record.field._
 import net.liftweb.mongodb.record._
 import net.liftweb.mongodb.record.field._
@@ -32,14 +33,33 @@ object UserMessage extends UserMessage with MongoMetaRecord[UserMessage] with Lo
 
 }
 
-class UserMessageBase extends MongoRecord[UserMessageBase] with ObjectIdPk[UserMessageBase] {
+class UserMessageBase extends MongoRecord[UserMessageBase] with ObjectIdPk[UserMessageBase] with Loggable {
   def meta = UserMessageBase
   object user1_id extends ObjectIdRefField(this, User)
   object user2_id extends ObjectIdRefField(this, User)
   def showMessages(limit: Int) = {
     UserMessage.where(_.base_id eqs this.id.is).orderDesc(_.id).fetch(limit).reverse
   }
+  def getFirstUsername={
+    this.user1_id.obj.map{
+      u => u.username.is
+    }.getOrElse{
+      logger.error("This id="+this.id.is +" does not have a proper user1_id")
+      ""
+    }
+  }
+  def getSecondUsername={
+     this.user2_id.obj.map{
+      u => u.username.is
+    }.getOrElse{
+      logger.error("This id="+this.id.is +" does not have a proper user1_id")
+      ""
+    }
+  }
+  
 }
+
+case class To(username:String, umb:UserMessageBase)
 
 object UserMessageBase extends UserMessageBase with MongoMetaRecord[UserMessageBase] with Loggable {
 
@@ -62,6 +82,27 @@ object UserMessageBase extends UserMessageBase with MongoMetaRecord[UserMessageB
       ls2.headOption
     } else {
       ls1.headOption
+    }
+  }
+  
+  
+  def findByUser(user:User):List[To]={
+    val ls1 = UserMessageBase.where(_.user1_id eqs user.id.is).fetch().map{
+      umb1 => To(umb1.getSecondUsername,umb1)
+    }
+    val ls2 = UserMessageBase.where(_.user2_id eqs user.id.is).fetch().map{
+      umb2 => To(umb2.getFirstUsername , umb2)
+    }
+    (ls1 ++ ls2).sortWith(compareTwoTo)
+  }
+  
+  def compareTwoTo(to1:To,to2:To)={
+    val date1 = to1.umb.showMessages(1).head.id.is.getTime().date
+    val date2 = to2.umb.showMessages(1).head.id.is.getTime().date
+    if(date1.after(date2)){
+      true
+    }else{
+      false
     }
   }
 }

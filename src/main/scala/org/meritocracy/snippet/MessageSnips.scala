@@ -26,6 +26,14 @@ class UserSendMessage extends Loggable{
       user =>
         Site.messagesLoc.currentValue.map {
           base =>
+            CometListerner.listenerFor(Full(base.id.toString)) match {
+                case a: LiftActor => {
+                  logger.info("We send the id=" + base.id.toString)
+                  a ! Base(base.id.toString,10)
+                
+                }
+                case _ => logger.info("No actor to send an update")
+              }
             "#textMessage" #> SHtml.ajaxText("", s => {
               message = s
             }) &

@@ -31,3 +31,28 @@ class ListOfUsers {
     }.getOrElse(NodeSeq.Empty)
   }
 }
+
+class ListOfMessages {
+  def render = {
+    User.currentUser.map{
+      user=>
+        
+        "#listOfMessages" #> UserMessageBase.findByUser(user).map{
+          to =>
+            val um = to.umb.showMessages(1).head
+            val msg = um.message.is
+            val username = if(um.getUsername == user.username.is){ "You" } else {um.getUsername}
+            "li *" #> {
+              "#username *" #> to.username &
+              "#latestSender *" #>  username &
+              "#latestMessage *" #> msg &
+              "#messenger *" #> SHtml.ajaxButton(Text("Chat even more...") , ()=>{
+                S.redirectTo("/messages/"+to.umb.id.is.toString)
+              })
+              
+            }
+        }
+        
+    }.getOrElse(NodeSeq.Empty)
+  }
+}
